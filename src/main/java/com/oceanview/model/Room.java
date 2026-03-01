@@ -17,7 +17,6 @@ public class Room {
         this.isAvailable = isAvailable;
     }
 
-    // Getters and Setters
     public int getRoomId() { return roomId; }
     public void setRoomId(int roomId) { this.roomId = roomId; }
 

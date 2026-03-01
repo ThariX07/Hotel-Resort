@@ -22,7 +22,6 @@ public class Reservation {
         this.checkOutDate = checkOutDate;
     }
 
-    // Getters and Setters
     public int getReservationId() { return reservationId; }
     public void setReservationId(int reservationId) { this.reservationId = reservationId; }
 

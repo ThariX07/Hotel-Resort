@@ -15,7 +15,6 @@ public class Guest {
         this.contactNumber = contactNumber;
     }
 
-    // Getters and Setters
     public int getGuestId() { return guestId; }
     public void setGuestId(int guestId) { this.guestId = guestId; }
 

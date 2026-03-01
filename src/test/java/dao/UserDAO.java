@@ -1,6 +1,7 @@
-package com.oceanview.dao;
+package dao;
 
 import com.oceanview.model.User;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
