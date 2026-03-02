@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@WebServlet("/reservation")
-public class ReservationServlet extends HttpServlet {
+@WebServlet("/customer-booking")
+public class CustomerBookingServlet extends HttpServlet {
 
     private final ReservationDAO reservationDAO = new ReservationDAO();
     private final Gson gson = new Gson();
@@ -30,7 +30,7 @@ public class ReservationServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         Map<String, Object> jsonResponse = new HashMap<>();
 
-        // 1. Ensure the Admin is actually logged in
+        // 1. Session Security Check
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -41,10 +41,10 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // Get the Admin's ID to record who made this walk-in booking
-        int adminUserId = (int) session.getAttribute("userId");
+        int userId = (int) session.getAttribute("userId");
 
         try {
+            // 2. Extract Form Data
             String guestName = request.getParameter("guestName");
             String address = request.getParameter("address");
             String contactNumber = request.getParameter("contactNumber");
@@ -52,6 +52,7 @@ public class ReservationServlet extends HttpServlet {
             LocalDate checkInDate = LocalDate.parse(request.getParameter("checkInDate"));
             LocalDate checkOutDate = LocalDate.parse(request.getParameter("checkOutDate"));
 
+            // 3. Object Assembly
             Guest guest = new Guest();
             guest.setName(guestName);
             guest.setAddress(address);
@@ -61,30 +62,28 @@ public class ReservationServlet extends HttpServlet {
             room.setRoomId(roomId);
 
             Reservation reservation = new Reservation();
-            String generatedResNumber = "RES-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase();
-            reservation.setReservationNumber(generatedResNumber);
+            reservation.setReservationNumber("RES-" + UUID.randomUUID().toString().substring(0, 5).toUpperCase());
             reservation.setGuest(guest);
             reservation.setRoom(room);
             reservation.setCheckInDate(checkInDate);
             reservation.setCheckOutDate(checkOutDate);
 
-            // 2. Pass both the reservation AND the adminUserId to the DAO
-            boolean success = reservationDAO.createReservation(reservation, adminUserId);
+            // 4. Database Insertion with User ID
+            boolean success = reservationDAO.createReservation(reservation, userId);
 
             if (success) {
                 jsonResponse.put("status", "success");
-                jsonResponse.put("message", "Reservation created successfully!");
-                jsonResponse.put("reservationNumber", generatedResNumber);
+                jsonResponse.put("message", "Room booked successfully! Redirecting to dashboard...");
             } else {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 jsonResponse.put("status", "error");
-                jsonResponse.put("message", "Failed to create reservation in database.");
+                jsonResponse.put("message", "Failed to book the room. Please try again.");
             }
 
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             jsonResponse.put("status", "error");
-            jsonResponse.put("message", "Invalid form data.");
+            jsonResponse.put("message", "Invalid form data provided.");
         }
 
         out.print(gson.toJson(jsonResponse));

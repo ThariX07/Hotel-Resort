@@ -8,9 +8,9 @@ import java.time.temporal.ChronoUnit;
 
 public class ReservationDAO {
 
-    public boolean createReservation(Reservation reservation) {
+    public boolean createReservation(Reservation reservation, int userId) {
         String guestSql = "INSERT INTO guests (name, address, contact_number) VALUES (?, ?, ?)";
-        String reservationSql = "INSERT INTO reservations (reservation_number, guest_id, room_id, check_in_date, check_out_date, total_cost) VALUES (?, ?, ?, ?, ?, ?)";
+        String reservationSql = "INSERT INTO reservations (reservation_number, guest_id, room_id, check_in_date, check_out_date, total_cost, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String roomSql = "SELECT price_per_night FROM rooms WHERE room_id = ?";
 
         Connection conn = null;
@@ -50,7 +50,7 @@ public class ReservationDAO {
                 throw new SQLException("Room not found.");
             }
 
-            long nights = ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
+            long nights = java.time.temporal.ChronoUnit.DAYS.between(reservation.getCheckInDate(), reservation.getCheckOutDate());
             if (nights <= 0) nights = 1;
 
             double totalCost = nights * pricePerNight;
@@ -63,6 +63,7 @@ public class ReservationDAO {
             resStmt.setDate(4, Date.valueOf(reservation.getCheckInDate()));
             resStmt.setDate(5, Date.valueOf(reservation.getCheckOutDate()));
             resStmt.setDouble(6, totalCost);
+            resStmt.setInt(7, userId); // Binding the session userId to the database!
             resStmt.executeUpdate();
 
             conn.commit();
@@ -132,5 +133,48 @@ public class ReservationDAO {
         }
 
         return bill;
+    }
+
+    public java.util.List<com.oceanview.dto.BillDTO> getReservationsByUserId(int userId) {
+        java.util.List<com.oceanview.dto.BillDTO> userReservations = new java.util.ArrayList<>();
+
+        String sql = "SELECT r.reservation_number, g.name, rm.room_number, rm.room_type, " +
+                "r.check_in_date, r.check_out_date, rm.price_per_night, r.total_cost " +
+                "FROM reservations r " +
+                "JOIN guests g ON r.guest_id = g.guest_id " +
+                "JOIN rooms rm ON r.room_id = rm.room_id " +
+                "WHERE r.user_id = ? ORDER BY r.check_in_date DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                java.time.LocalDate checkIn = rs.getDate("check_in_date").toLocalDate();
+                java.time.LocalDate checkOut = rs.getDate("check_out_date").toLocalDate();
+                long nights = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
+                if (nights <= 0) nights = 1;
+
+                com.oceanview.dto.BillDTO dto = new com.oceanview.dto.BillDTO.BillBuilder()
+                        .setReservationNumber(rs.getString("reservation_number"))
+                        .setGuestName(rs.getString("name"))
+                        .setRoomNumber(rs.getString("room_number"))
+                        .setRoomType(rs.getString("room_type"))
+                        .setCheckInDate(checkIn)
+                        .setCheckOutDate(checkOut)
+                        .setNumberOfNights(nights)
+                        .setPricePerNight(rs.getDouble("price_per_night"))
+                        .setTotalCost(rs.getDouble("total_cost"))
+                        .build();
+
+                userReservations.add(dto);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return userReservations;
     }
 }

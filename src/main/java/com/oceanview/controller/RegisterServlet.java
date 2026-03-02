@@ -7,14 +7,13 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/register")
+public class RegisterServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
     private final Gson gson = new Gson();
@@ -29,21 +28,28 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        User user = userDAO.authenticateUser(username, password);
-
-        if (user != null) {
-            HttpSession session = request.getSession();
-            session.setAttribute("userId", user.getUserId());
-            session.setAttribute("username", user.getUsername());
-            session.setAttribute("role", user.getRole());
-
-            jsonResponse.put("status", "success");
-            jsonResponse.put("message", "Login successful");
-            jsonResponse.put("role", user.getRole());
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             jsonResponse.put("status", "error");
-            jsonResponse.put("message", "Invalid username or password");
+            jsonResponse.put("message", "Username and password are required.");
+            out.print(gson.toJson(jsonResponse));
+            out.flush();
+            return;
+        }
+
+        User newUser = new User();
+        newUser.setUsername(username.trim());
+        newUser.setPassword(password);
+
+        boolean isRegistered = userDAO.registerUser(newUser);
+
+        if (isRegistered) {
+            jsonResponse.put("status", "success");
+            jsonResponse.put("message", "Account created successfully! You can now log in.");
+        } else {
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
+            jsonResponse.put("status", "error");
+            jsonResponse.put("message", "Username already exists. Please choose another.");
         }
 
         out.print(gson.toJson(jsonResponse));
