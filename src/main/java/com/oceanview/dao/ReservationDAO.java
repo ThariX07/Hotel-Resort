@@ -91,4 +91,46 @@ public class ReservationDAO {
             }
         }
     }
+
+    public com.oceanview.dto.BillDTO getReservationDetails(String reservationNumber) {
+        String sql = "SELECT r.reservation_number, g.name, rm.room_number, rm.room_type, " +
+                "r.check_in_date, r.check_out_date, rm.price_per_night, r.total_cost " +
+                "FROM reservations r " +
+                "JOIN guests g ON r.guest_id = g.guest_id " +
+                "JOIN rooms rm ON r.room_id = rm.room_id " +
+                "WHERE r.reservation_number = ?";
+
+        com.oceanview.dto.BillDTO bill = null;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, reservationNumber);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                java.time.LocalDate checkIn = rs.getDate("check_in_date").toLocalDate();
+                java.time.LocalDate checkOut = rs.getDate("check_out_date").toLocalDate();
+                long nights = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
+                if (nights <= 0) nights = 1;
+
+                bill = new com.oceanview.dto.BillDTO.BillBuilder()
+                        .setReservationNumber(rs.getString("reservation_number"))
+                        .setGuestName(rs.getString("name"))
+                        .setRoomNumber(rs.getString("room_number"))
+                        .setRoomType(rs.getString("room_type"))
+                        .setCheckInDate(checkIn)
+                        .setCheckOutDate(checkOut)
+                        .setNumberOfNights(nights)
+                        .setPricePerNight(rs.getDouble("price_per_night"))
+                        .setTotalCost(rs.getDouble("total_cost"))
+                        .build();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return bill;
+    }
 }

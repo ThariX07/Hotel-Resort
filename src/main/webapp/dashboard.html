@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Receptionist Dashboard - Ocean View</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-4">
+  <div class="container">
+    <span class="navbar-brand mb-0 h1">Ocean View Resort - Reception</span>
+    <a href="index.html" class="btn btn-outline-light btn-sm">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">New Room Reservation</h5>
+        </div>
+        <div class="card-body">
+          <div id="alertBox" class="alert d-none" role="alert"></div>
+
+          <form id="reservationForm">
+            <h6 class="border-bottom pb-2 mb-3">Guest Details</h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Contact Number</label>
+                <input type="text" class="form-control" id="contactNumber" required>
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Address</label>
+              <input type="text" class="form-control" id="address" required>
+            </div>
+
+            <h6 class="border-bottom pb-2 mb-3">Booking Details</h6>
+            <div class="row mb-3">
+              <div class="col-md-4">
+                <label class="form-label">Select Room</label>
+                <select class="form-select" id="roomId" required>
+                  <option value="" selected disabled>Choose...</option>
+                  <option value="1">101 - Standard (5000/night)</option>
+                  <option value="2">102 - Ocean View (8500/night)</option>
+                  <option value="3">201 - Deluxe Suite (15000/night)</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Check-in Date</label>
+                <input type="date" class="form-control" id="checkInDate" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Check-out Date</label>
+                <input type="date" class="form-control" id="checkOutDate" required>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <button type="reset" class="btn btn-secondary">Clear</button>
+              <button type="submit" class="btn btn-success">Confirm Reservation</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('reservationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const alertBox = document.getElementById('alertBox');
+    alertBox.className = 'alert d-none';
+
+    const formData = new URLSearchParams();
+    formData.append('name', document.getElementById('name').value);
+    formData.append('contactNumber', document.getElementById('contactNumber').value);
+    formData.append('address', document.getElementById('address').value);
+    formData.append('roomId', document.getElementById('roomId').value);
+    formData.append('checkInDate', document.getElementById('checkInDate').value);
+    formData.append('checkOutDate', document.getElementById('checkOutDate').value);
+
+    fetch('reservation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString()
+    })
+            .then(response => response.json())
+            .then(data => {
+              alertBox.classList.remove('d-none');
+              if(data.status === 'success') {
+                alertBox.classList.add('alert-success');
+                alertBox.innerHTML = `<strong>Success!</strong> ${data.message} <br>
+                                      Reservation No: <strong>${data.reservationNumber}</strong> <br>
+                                      Total Cost: <strong>Rs. ${data.totalCost.toFixed(2)}</strong>`;
+                document.getElementById('reservationForm').reset();
+              } else {
+                alertBox.classList.add('alert-danger');
+                alertBox.innerText = data.message;
+              }
+            })
+            .catch(error => {
+              alertBox.classList.remove('d-none');
+              alertBox.classList.add('alert-danger');
+              alertBox.innerText = 'Network error occurred. Please try again.';
+            });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
