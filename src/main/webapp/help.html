@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System Help - Ocean View Resort</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-4">
+  <div class="container">
+    <span class="navbar-brand mb-0 h1">Ocean View Resort - Help Center</span>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+      <a href="bill.html" class="btn btn-outline-light btn-sm me-2">Billing</a>
+      <a href="index.html" class="btn btn-outline-danger btn-sm">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+          <h5 class="mb-0">Staff Guidelines & System Usage</h5>
+        </div>
+        <div class="card-body">
+          <p class="lead">Welcome to the Ocean View Resort Reservation System. Follow the instructions below to manage guest bookings efficiently.</p>
+
+          <div class="accordion" id="helpAccordion">
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                  1. Creating a New Reservation
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  Navigate to the <strong>Dashboard</strong>. Fill in the guest's full name, contact number, and address. Select the desired room type and specify the check-in and check-out dates. Click <strong>Confirm Reservation</strong>. The system will automatically generate a unique RES- number and calculate the initial total cost. Please provide this RES- number to the guest.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                  2. Generating and Printing a Bill
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  Navigate to the <strong>Billing</strong> page. Enter the guest's unique Reservation Number (e.g., RES-A1B2C) into the search bar and click Search. The system will retrieve the guest's details, stay duration, and total amount due. Click the <strong>Print Invoice</strong> button at the bottom of the screen to send a formatted copy to the front desk printer.
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                  3. System Security & Logout
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#helpAccordion">
+                <div class="accordion-body">
+                  Always ensure you click the red <strong>Logout</strong> button in the top right corner of the navigation bar when leaving the front desk. This terminates your secure session and prevents unauthorized access to guest data.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

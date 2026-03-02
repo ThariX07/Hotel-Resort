@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generate Bill - Ocean View Resort</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .card {
+        border: none !important;
+        box-shadow: none !important;
+      }
+      body {
+        background-color: white !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark mb-4 no-print">
+  <div class="container">
+    <span class="navbar-brand mb-0 h1">Ocean View Resort - Billing</span>
+    <div>
+      <a href="dashboard.html" class="btn btn-outline-light btn-sm me-2">Dashboard</a>
+      <a href="index.html" class="btn btn-outline-danger btn-sm">Logout</a>
+      <a href="help.html" class="btn btn-outline-info btn-sm me-2">Help</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row justify-content-center no-print mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form id="searchForm" class="d-flex">
+            <input type="text" id="resNumber" class="form-control me-2" placeholder="Enter Reservation Number (e.g., RES-XXXXX)" required>
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+          <div id="errorBox" class="text-danger mt-2 d-none"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="billCard" class="row justify-content-center d-none">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-5">
+          <div class="text-center mb-4">
+            <h2>Ocean View Resort</h2>
+            <p class="text-muted">Official Guest Invoice</p>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-sm-6">
+              <h6 class="mb-1">Billed To:</h6>
+              <div id="bGuestName" class="fw-bold fs-5"></div>
+            </div>
+            <div class="col-sm-6 text-end">
+              <h6 class="mb-1">Reservation No:</h6>
+              <div id="bResNo" class="fw-bold fs-5"></div>
+            </div>
+          </div>
+
+          <table class="table table-bordered mb-4">
+            <thead class="table-light">
+            <tr>
+              <th>Description</th>
+              <th>Details</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>Room</td>
+              <td><span id="bRoomNo"></span> (<span id="bRoomType"></span>)</td>
+            </tr>
+            <tr>
+              <td>Stay Duration</td>
+              <td><span id="bCheckIn"></span> to <span id="bCheckOut"></span> (<span id="bNights"></span> nights)</td>
+            </tr>
+            <tr>
+              <td>Rate per Night</td>
+              <td>Rs. <span id="bPrice"></span></td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+              <th class="text-end">Total Amount Due:</th>
+              <th class="fs-4 text-success">Rs. <span id="bTotal"></span></th>
+            </tr>
+            </tfoot>
+          </table>
+
+          <div class="text-center no-print mt-4">
+            <button onclick="window.print()" class="btn btn-success btn-lg px-5">Print Invoice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('searchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const resNumber = document.getElementById('resNumber').value.trim();
+    const errorBox = document.getElementById('errorBox');
+    const billCard = document.getElementById('billCard');
+
+    errorBox.classList.add('d-none');
+    billCard.classList.add('d-none');
+
+    fetch('bill?reservationNumber=' + encodeURIComponent(resNumber))
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'success') {
+                const b = data.bill;
+
+                document.getElementById('bGuestName').innerText = b.guestName;
+                document.getElementById('bResNo').innerText = b.reservationNumber;
+                document.getElementById('bRoomNo').innerText = b.roomNumber;
+                document.getElementById('bRoomType').innerText = b.roomType;
+
+                const formatIn = b.checkInDate.year ? `${b.checkInDate.year}-${b.checkInDate.month}-${b.checkInDate.day}` : b.checkInDate;
+                const formatOut = b.checkOutDate.year ? `${b.checkOutDate.year}-${b.checkOutDate.month}-${b.checkOutDate.day}` : b.checkOutDate;
+
+                document.getElementById('bCheckIn').innerText = formatIn;
+                document.getElementById('bCheckOut').innerText = formatOut;
+
+                document.getElementById('bNights').innerText = b.numberOfNights;
+                document.getElementById('bPrice').innerText = b.pricePerNight.toFixed(2);
+                document.getElementById('bTotal').innerText = b.totalCost.toFixed(2);
+
+                billCard.classList.remove('d-none');
+              } else {
+                errorBox.innerText = data.message || 'Reservation not found.';
+                errorBox.classList.remove('d-none');
+              }
+            })
+            .catch(error => {
+              errorBox.innerText = 'Network error occurred. Is Tomcat running?';
+              errorBox.classList.remove('d-none');
+            });
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
