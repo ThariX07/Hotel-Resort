@@ -44,15 +44,13 @@ public class CustomerBookingServlet extends HttpServlet {
         int userId = (int) session.getAttribute("userId");
 
         try {
-            // 2. Extract Form Data
             String guestName = request.getParameter("guestName");
             String address = request.getParameter("address");
             String contactNumber = request.getParameter("contactNumber");
             int roomId = Integer.parseInt(request.getParameter("roomId"));
             LocalDate checkInDate = LocalDate.parse(request.getParameter("checkInDate"));
             LocalDate checkOutDate = LocalDate.parse(request.getParameter("checkOutDate"));
-
-            // 3. Object Assembly
+            
             Guest guest = new Guest();
             guest.setName(guestName);
             guest.setAddress(address);
@@ -68,7 +66,6 @@ public class CustomerBookingServlet extends HttpServlet {
             reservation.setCheckInDate(checkInDate);
             reservation.setCheckOutDate(checkOutDate);
 
-            // 4. Database Insertion with User ID
             boolean success = reservationDAO.createReservation(reservation, userId);
 
             if (success) {
