@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 public class Reservation {
     private int reservationId;
-    private String reservationNumber; // The unique assigned number [cite: 20]
-    private Guest guest;              // Composition: Reservation HAS-A Guest
-    private Room room;                // Composition: Reservation HAS-A Room
+    private String reservationNumber;
+    private Guest guest;             
+    private Room room;                
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
     private double totalCost;
@@ -22,7 +22,6 @@ public class Reservation {
         this.checkOutDate = checkOutDate;
     }
 
-    // Getters and Setters
     public int getReservationId() { return reservationId; }
     public void setReservationId(int reservationId) { this.reservationId = reservationId; }
 
