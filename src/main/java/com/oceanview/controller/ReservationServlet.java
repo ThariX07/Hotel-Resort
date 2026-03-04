@@ -30,7 +30,6 @@ public class ReservationServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         Map<String, Object> jsonResponse = new HashMap<>();
 
-        // 1. Ensure the Admin is actually logged in
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -41,7 +40,6 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // Get the Admin's ID to record who made this walk-in booking
         int adminUserId = (int) session.getAttribute("userId");
 
         try {
@@ -68,7 +66,6 @@ public class ReservationServlet extends HttpServlet {
             reservation.setCheckInDate(checkInDate);
             reservation.setCheckOutDate(checkOutDate);
 
-            // 2. Pass both the reservation AND the adminUserId to the DAO
             boolean success = reservationDAO.createReservation(reservation, adminUserId);
 
             if (success) {
