@@ -37,7 +37,7 @@ public class LoginServlet extends HttpServlet {
         if (user != null) {
             HttpSession session = request.getSession();
             session.setAttribute("loggedInUser", user.getUsername());
-            session.setMaxInactiveInterval(30 * 60); // Session expires after 30 minutes of inactivity
+            session.setMaxInactiveInterval(30 * 60);
 
             jsonResponse.put("status", "success");
             jsonResponse.put("message", "Login successful");
