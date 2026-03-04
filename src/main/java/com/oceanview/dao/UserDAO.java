@@ -29,8 +29,6 @@ public class UserDAO {
         } catch (SQLException e) {
             System.out.println("Error during authentication: " + e.getMessage());
         }
-
-        // Returns the user object if found, or 'null' if login failed
         return user;
     }
 }
