@@ -25,7 +25,6 @@ public class CustomerHistoryServlet extends HttpServlet {
 
     private final ReservationDAO reservationDAO = new ReservationDAO();
 
-    // Using the same Gson config that safely handles Java 23 LocalDate security!
     private final Gson gson = new GsonBuilder()
             .registerTypeAdapter(LocalDate.class, new TypeAdapter<LocalDate>() {
                 @Override
@@ -48,7 +47,6 @@ public class CustomerHistoryServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
-        // Security Check: Ensure the user is actually logged in
         if (session == null || session.getAttribute("userId") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             jsonResponse.put("status", "error");
