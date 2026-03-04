@@ -61,7 +61,6 @@
 
         fetch('customer-history')
             .then(response => {
-                // Security guard: If Tomcat says 401 Unauthorized, kick them back to login instantly
                 if (response.status === 401) {
                     window.location.href = 'index.html';
                     throw new Error("Unauthorized");
@@ -78,7 +77,6 @@
                         noData.classList.remove('d-none');
                     } else {
                         reservations.forEach(res => {
-                            // Extract dates safely whether they come as objects or strings
                             const formatIn = res.checkInDate.year ? `${res.checkInDate.year}-${String(res.checkInDate.month).padStart(2, '0')}-${String(res.checkInDate.day).padStart(2, '0')}` : res.checkInDate;
                             const formatOut = res.checkOutDate.year ? `${res.checkOutDate.year}-${String(res.checkOutDate.month).padStart(2, '0')}-${String(res.checkOutDate.day).padStart(2, '0')}` : res.checkOutDate;
 
