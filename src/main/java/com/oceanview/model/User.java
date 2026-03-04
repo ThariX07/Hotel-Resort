@@ -4,19 +4,15 @@ public class User {
     private int id;
     private String username;
     private String password;
-
-    // Empty constructor (required for Java Beans)
+    
     public User() {
     }
-
-    // Full constructor
     public User(int id, String username, String password) {
         this.id = id;
         this.username = username;
         this.password = password;
     }
 
-    // Getters and Setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
