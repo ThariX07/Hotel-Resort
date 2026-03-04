@@ -3,7 +3,7 @@ package com.oceanview.model;
 public class Room {
     private int roomId;
     private String roomNumber;
-    private String roomType; // e.g., Standard, Deluxe, Ocean View
+    private String roomType; 
     private double pricePerNight;
     private boolean isAvailable;
 
@@ -16,8 +16,6 @@ public class Room {
         this.pricePerNight = pricePerNight;
         this.isAvailable = isAvailable;
     }
-
-    // Getters and Setters
     public int getRoomId() { return roomId; }
     public void setRoomId(int roomId) { this.roomId = roomId; }
 
