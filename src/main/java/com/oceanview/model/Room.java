@@ -3,7 +3,7 @@ package com.oceanview.model;
 public class Room {
     private int roomId;
     private String roomNumber;
-    private String roomType; // e.g., Standard, Deluxe, Ocean View
+    private String roomType; 
     private double pricePerNight;
     private boolean isAvailable;
 
