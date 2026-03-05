@@ -1,9 +1,7 @@
-name: Java CI/CD Pipeline with Maven
+name: Java CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
     branches: [ "main", "master" ]
 
 jobs:
