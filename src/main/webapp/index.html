@@ -54,11 +54,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    if (data.role === 'ADMIN') {
-                        window.location.href = 'dashboard.html';
-                    } else {
-                        window.location.href = 'customer_dashboard.html';
-                    }
+                    window.location.href = 'dashboard.html';
                 } else {
                     alertBox.classList.remove('d-none');
                     alertBox.classList.add('alert-danger');

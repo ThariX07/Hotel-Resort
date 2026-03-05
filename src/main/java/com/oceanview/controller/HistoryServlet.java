@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet("/customer-history")
-public class CustomerHistoryServlet extends HttpServlet {
+@WebServlet("/history")
+public class HistoryServlet extends HttpServlet {
 
     private final ReservationDAO reservationDAO = new ReservationDAO();
 
@@ -58,8 +58,8 @@ public class CustomerHistoryServlet extends HttpServlet {
             return;
         }
 
-        int userId = (int) session.getAttribute("userId");
-        List<BillDTO> reservations = reservationDAO.getReservationsByUserId(userId);
+
+        List<BillDTO> reservations = reservationDAO.getAllReservations();
 
         jsonResponse.put("status", "success");
         jsonResponse.put("reservations", reservations);

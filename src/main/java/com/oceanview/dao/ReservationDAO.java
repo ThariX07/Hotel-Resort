@@ -135,20 +135,19 @@ public class ReservationDAO {
         return bill;
     }
 
-    public java.util.List<com.oceanview.dto.BillDTO> getReservationsByUserId(int userId) {
-        java.util.List<com.oceanview.dto.BillDTO> userReservations = new java.util.ArrayList<>();
+    public java.util.List<com.oceanview.dto.BillDTO> getAllReservations() {
+        java.util.List<com.oceanview.dto.BillDTO> allReservations = new java.util.ArrayList<>();
 
         String sql = "SELECT r.reservation_number, g.name, rm.room_number, rm.room_type, " +
                 "r.check_in_date, r.check_out_date, rm.price_per_night, r.total_cost " +
                 "FROM reservations r " +
                 "JOIN guests g ON r.guest_id = g.guest_id " +
                 "JOIN rooms rm ON r.room_id = rm.room_id " +
-                "WHERE r.user_id = ? ORDER BY r.check_in_date DESC";
+                "ORDER BY r.check_in_date DESC";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -169,12 +168,12 @@ public class ReservationDAO {
                         .setTotalCost(rs.getDouble("total_cost"))
                         .build();
 
-                userReservations.add(dto);
+                allReservations.add(dto);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return userReservations;
+        return allReservations;
     }
 }
