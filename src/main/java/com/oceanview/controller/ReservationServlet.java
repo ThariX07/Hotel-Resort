@@ -5,6 +5,7 @@ import com.oceanview.dao.ReservationDAO;
 import com.oceanview.model.Guest;
 import com.oceanview.model.Reservation;
 import com.oceanview.model.Room;
+import com.oceanview.dao.EmailUtility;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,6 @@ public class ReservationServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         Map<String, Object> jsonResponse = new HashMap<>();
 
-        // 1. Ensure the Admin is actually logged in
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("userId") == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -41,13 +41,14 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // Get the Admin's ID to record who made this walk-in booking
         int adminUserId = (int) session.getAttribute("userId");
 
         try {
             String guestName = request.getParameter("guestName");
             String address = request.getParameter("address");
             String contactNumber = request.getParameter("contactNumber");
+            String guestEmail = request.getParameter("guestEmail");
+
             int roomId = Integer.parseInt(request.getParameter("roomId"));
             LocalDate checkInDate = LocalDate.parse(request.getParameter("checkInDate"));
             LocalDate checkOutDate = LocalDate.parse(request.getParameter("checkOutDate"));
@@ -56,6 +57,7 @@ public class ReservationServlet extends HttpServlet {
             guest.setName(guestName);
             guest.setAddress(address);
             guest.setContactNumber(contactNumber);
+            guest.setEmail(guestEmail);
 
             Room room = new Room();
             room.setRoomId(roomId);
@@ -68,13 +70,19 @@ public class ReservationServlet extends HttpServlet {
             reservation.setCheckInDate(checkInDate);
             reservation.setCheckOutDate(checkOutDate);
 
-            // 2. Pass both the reservation AND the adminUserId to the DAO
             boolean success = reservationDAO.createReservation(reservation, adminUserId);
 
             if (success) {
                 jsonResponse.put("status", "success");
                 jsonResponse.put("message", "Reservation created successfully!");
                 jsonResponse.put("reservationNumber", generatedResNumber);
+
+                double totalCost = reservation.getTotalCost();
+
+                java.util.concurrent.CompletableFuture.runAsync(() -> {
+                    EmailUtility.sendBookingConfirmation(guestEmail, generatedResNumber, guestName, totalCost);
+                });
+
             } else {
                 response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 jsonResponse.put("status", "error");
@@ -82,6 +90,7 @@ public class ReservationServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             jsonResponse.put("status", "error");
             jsonResponse.put("message", "Invalid form data.");

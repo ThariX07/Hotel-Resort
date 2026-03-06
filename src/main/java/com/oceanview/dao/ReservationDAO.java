@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 public class ReservationDAO {
 
     public boolean createReservation(Reservation reservation, int userId) {
-        String guestSql = "INSERT INTO guests (name, address, contact_number) VALUES (?, ?, ?)";
+        String guestSql = "INSERT INTO guests (name, address, contact_number, email) VALUES (?, ?, ?, ?)";
         String reservationSql = "INSERT INTO reservations (reservation_number, guest_id, room_id, check_in_date, check_out_date, total_cost, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
         String roomSql = "SELECT price_per_night FROM rooms WHERE room_id = ?";
 
@@ -28,6 +28,7 @@ public class ReservationDAO {
             guestStmt.setString(1, reservation.getGuest().getName());
             guestStmt.setString(2, reservation.getGuest().getAddress());
             guestStmt.setString(3, reservation.getGuest().getContactNumber());
+            guestStmt.setString(4, reservation.getGuest().getEmail());
             guestStmt.executeUpdate();
 
             generatedKeys = guestStmt.getGeneratedKeys();
@@ -63,7 +64,7 @@ public class ReservationDAO {
             resStmt.setDate(4, Date.valueOf(reservation.getCheckInDate()));
             resStmt.setDate(5, Date.valueOf(reservation.getCheckOutDate()));
             resStmt.setDouble(6, totalCost);
-            resStmt.setInt(7, userId); // Binding the session userId to the database!
+            resStmt.setInt(7, userId);
             resStmt.executeUpdate();
 
             conn.commit();
@@ -175,5 +176,32 @@ public class ReservationDAO {
         }
 
         return allReservations;
+    }
+
+    public java.util.List<java.util.Map<String, Object>> getRevenueReportData() {
+        java.util.List<java.util.Map<String, Object>> reportData = new java.util.ArrayList<>();
+
+        String sql = "SELECT r.room_type, COUNT(res.reservation_number) as total_bookings, SUM(res.total_cost) as total_revenue " +
+                "FROM rooms r " +
+                "LEFT JOIN reservations res ON r.room_id = res.room_id " +
+                "GROUP BY r.room_type";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                java.util.Map<String, Object> row = new java.util.HashMap<>();
+                row.put("roomType", rs.getString("room_type"));
+                row.put("totalBookings", rs.getInt("total_bookings"));
+                double revenue = rs.getObject("total_revenue") != null ? rs.getDouble("total_revenue") : 0.0;
+                row.put("totalRevenue", revenue);
+
+                reportData.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return reportData;
     }
 }

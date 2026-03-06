@@ -18,6 +18,7 @@
   <div class="container-fluid px-4">
     <span class="navbar-brand mb-0 h1">Ocean View Resort - Front Desk Terminal</span>
     <div>
+      <button class="btn btn-outline-warning btn-sm me-2" onclick="fetchAndShowReport()">Management Report</button>
       <a href="bill.html" class="btn btn-outline-light btn-sm me-2">Billing & Invoices</a>
       <a href="help.html" class="btn btn-outline-info btn-sm me-2">System Help</a>
       <a href="index.html" class="btn btn-danger btn-sm">Secure Logout</a>
@@ -44,6 +45,10 @@
               <div class="col-md-6">
                 <label class="form-label fw-bold">Contact Number</label>
                 <input type="text" id="contactNumber" class="form-control" required>
+              </div>
+              <div class="col-md-6">
+                <label for="guestEmail" class="form-label fw-bold">Guest Email</label>
+                <input type="email" class="form-control" id="guestEmail" name="guestEmail" required>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-bold">Room Type</label>
@@ -106,6 +111,29 @@
     </div>
   </div>
 </div>
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Monthly Revenue & Occupancy Report</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered text-center">
+          <thead class="table-light">
+          <tr>
+            <th>Room Type</th>
+            <th>Total Bookings</th>
+            <th>Total Revenue (LKR)</th>
+          </tr>
+          </thead>
+          <tbody id="reportTableBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', loadReservations);
@@ -159,6 +187,47 @@
             });
   }
 
+  function fetchAndShowReport() {
+    const reportBody = document.getElementById('reportTableBody');
+    reportBody.innerHTML = '<tr><td colspan="3">Loading report data...</td></tr>';
+
+    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
+    reportModal.show();
+
+    fetch('report')
+            .then(response => {
+              if (response.status === 401) throw new Error("Unauthorized");
+              return response.json();
+            })
+            .then(data => {
+              reportBody.innerHTML = '';
+              if (data.status === 'success') {
+                let totalRev = 0;
+                data.data.forEach(row => {
+                  totalRev += row.totalRevenue;
+                  reportBody.innerHTML += `
+                        <tr>
+                            <td class="fw-bold">${row.roomType}</td>
+                            <td>${row.totalBookings}</td>
+                            <td class="text-success fw-bold">${row.totalRevenue.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+                reportBody.innerHTML += `
+                    <tr class="table-secondary">
+                        <td colspan="2" class="fw-bold text-end">Grand Total:</td>
+                        <td class="fw-bold text-success">${totalRev.toFixed(2)}</td>
+                    </tr>
+                `;
+              } else {
+                reportBody.innerHTML = `<tr><td colspan="3" class="text-danger">${data.message}</td></tr>`;
+              }
+            })
+            .catch(error => {
+              reportBody.innerHTML = '<tr><td colspan="3" class="text-danger">Network error fetching report.</td></tr>';
+            });
+  }
+
   document.getElementById('reservationForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -168,6 +237,7 @@
     const formData = new URLSearchParams();
     formData.append('guestName', document.getElementById('guestName').value);
     formData.append('contactNumber', document.getElementById('contactNumber').value);
+    formData.append('guestEmail', document.getElementById('guestEmail').value);
     formData.append('address', document.getElementById('address').value);
     formData.append('roomId', document.getElementById('roomId').value);
     formData.append('checkInDate', document.getElementById('checkInDate').value);
@@ -209,5 +279,6 @@
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>
