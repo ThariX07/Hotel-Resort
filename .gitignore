@@ -13,6 +13,9 @@ target/
 *.iml
 *.ipr
 
+# Custom Ignored Files
+src/main/java/com/oceanview/dao/EmailUtility.java
+
 ### Eclipse ###
 .apt_generated
 .classpath
