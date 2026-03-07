@@ -7,8 +7,8 @@ import java.util.Properties;
 
 public class EmailUtility {
 
-    private static final String SENDER_EMAIL = "contact.tharindu007@gmail.com";
-    private static final String SENDER_PASSWORD = "iowhwqjpayajukiq";
+    private static final String SENDER_EMAIL = "";
+    private static final String SENDER_PASSWORD = "";
 
     public static void sendBookingConfirmation(String recipientEmail, String reservationNumber, String guestName, double totalCost) {
         Properties props = new Properties();
